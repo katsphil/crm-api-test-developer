@@ -1,0 +1,35 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    - name: Run tests
+      env:
+        DEBUG: 1
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        ALLOWED_HOSTS: 'localhost,127.0.0.1'
+      run: |
+        poetry run python manage.py test
