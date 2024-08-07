@@ -121,7 +121,7 @@ docker compose exec web python manage.py shell_plus
 In order to interact with the API, visit `/api/swagger/`
 
 1. Authenticate:
-   - Use the `/api/rest-auth/login/` endpoint to obtain an authentication token.
+   - Use the `/api/rest-auth/login/` endpoint to obtain an authentication token. (You may need to create an admin user via the admin panel. See 3)
    - Include the token in the Authorization header of your requests: `Authorization: Token <your_token>`
 
 2. API Endpoints:
