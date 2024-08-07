@@ -45,7 +45,7 @@ Developers should consult with the [Setup](#setup) and [Development](#developmen
 6. Sign in as admin (use credentials just created) to create a user and set `is_admin` to true:
    - Navigate to `http://localhost:8000/admin/`
 
-6. Browse API:
+7. Browse API:
    - Navigate to `http://localhost:8000/api/swagger/`
 
 ## Development
