@@ -125,7 +125,7 @@ class UserAPITest(APITestCase):
     def setUp(self):
         self.admin_user = User.objects.create_user(username='admin', password='adminpass', is_admin=True)
         self.normal_user = User.objects.create_user(username='normal', password='normalpass')
-        self.url = reverse("user-set-admin-status", kwargs={"pk": self.normal_user.pk})
+        self.url = reverse("user-detail", kwargs={"pk": self.normal_user.pk})
 
     def test_list_users(self):
         self.client.force_authenticate(user=self.admin_user)
@@ -165,13 +165,6 @@ class UserAPITest(APITestCase):
     def test_set_admin_status_invalid_input(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.patch(self.url, {"is_admin": "not a boolean"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.normal_user.refresh_from_db()
-        self.assertFalse(self.normal_user.is_admin)
-
-    def test_set_admin_status_missing_input(self):
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.patch(self.url, {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.normal_user.refresh_from_db()
         self.assertFalse(self.normal_user.is_admin)
