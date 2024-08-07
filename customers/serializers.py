@@ -10,7 +10,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CustomerSerializer(serializers.ModelSerializer):
-    photo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Customer
@@ -19,16 +18,12 @@ class CustomerSerializer(serializers.ModelSerializer):
             "name",
             "surname",
             "photo",
-            "photo_url",
             "created_by",
             "modified_by",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["created_by", "modified_by", "created_at", "updated_at"]
-
-    def get_photo_url(self, obj):
-        return obj.get_photo_url()
 
     def create(self, validated_data):
         validated_data["created_by"] = self.context["request"].user
