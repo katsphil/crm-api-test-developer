@@ -49,53 +49,62 @@ Developers should consult with the [Setup](#setup) and [Development](#developmen
    - Navigate to `http://localhost:8000/api/swagger/`
 
 ## Database Initialization
-For local testing or development purposes, seed the database with `docker compose exec web python manage.py seed_db`
-The database will be seeded with:
-	- a `Google` social application to be used for OAuth (using credentials provided in `.env`)
-	- a superuser to be used on `/admin/`	  
-		username: `admin`  
-		password: `password123`  
-	- two users:
-		- CRM admin user  
-			username: `admin_user`  
-			password: `password123`  
-		- CRM normal user  
-			username: `normal_user`  
-			password: `password123`
-	- a few customers
 
-# OAuth
-We will be using Google as a third party OAuth provider
-* set social app in django admin * set callback url
-* SUPPLY test user email in order to add to the oauth consent screen test users on google cloud console
-* Set redirect URL in Google Cloud Console and in `settings.py`
-* Deployment create social application in `/admin/`
-* Define the redirect URL as the same as where you start your server e.g. http://127.0.0.1.
-	- Set this value to `GOOGLE_REDIRECT_URL` in `settings.py`
-	- Add it as a redirect URI in Authorized Javascript origins and Authorized redirect URIs in your Project in the Oauth Credential in the Google Developer console.
+### Local Testing or Development
+For local testing or development purposes, you can seed the database with sample data by running the following command:
 
-* To login via Google OAuth:
-	Fill in:
-	```
-	<CALLBACK_URL_YOU_SET_ON_GOOGLE> e.g. http://127.0.0.1.
-	<YOUR CLIENT ID> Google OAuth Client
-	```
-	Into, and navigate to it:
-	`https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=<CALLBACK_URL_YOU_SET_ON_GOOGLE>&prompt=consent&response_type=code&client_id=<YOUR CLIENT ID>&scope=openid%20email%20profile&access_type=offline`
+```
+docker compose exec web python manage.py seed_db
+```
 
-* If testing manually, after the redirection:
-	- Copy the `code` part from the url query string (decode as it is URL encoded)
-	- POST to `/api/rest-auth/google`. The body of the POST must have a key called `code` with the value from the previous step.
-	A user will be created/logged in and an authorization token, returned.
+This will seed the database with the following:
 
+1. A `Google` social application to be used for OAuth, using the credentials provided in the `.env` file.
+2. A superuser account with the following credentials:
+   - Username: `admin`
+   - Password: `password123`
+3. Two CRM user accounts:
+   - CRM admin user:
+     - Username: `admin_user`
+     - Password: `password123`
+   - CRM normal user:
+     - Username: `normal_user`
+     - Password: `password123`
+4. A few customer records.
 
-* Create a new project and set up Google OAuth credentials in Google Cloud Console (https://console.cloud.google.com/) and copy:
-	* Copy `Client ID` into `GOOGLE_OAUTH_CLIENT_ID` of `.env` file
-	* Copy `Client Secret` into `GOOGLE_OAUTH_CLIENT_SECRET` of `.env` file
+This seeding process helps you get started with a pre-populated database for local testing and development purposes.
 
-   - Set the authorized JavaScript origins to your frontend URL (e.g., http://localhost:3000 for development)
-   - Set the authorized redirect URIs to your backend URL followed by the callback path (e.g., http://localhost:8000/accounts/google/login/callback/)
-   - Note down the Client ID and Client Secret
+## OAuth
+This project integrates Google OAuth authentication to allow users to sign in using their Google accounts.
+
+## Setup
+
+### Django Configuration
+1. Set up a social application in the Django admin panel.
+2. Configure the callback URL in the Django settings (`GOOGLE_REDIRECT_URL`).
+3. Ensure that the redirect URL matches the one set in the Google Cloud Console.
+
+### Google Cloud Console Configuration
+1. Create a new project in the Google Cloud Console (https://console.cloud.google.com/).
+2. Set up the Google OAuth credentials:
+   - Copy the `Client ID` into the `GOOGLE_OAUTH_CLIENT_ID` environment variable.
+   - Copy the `Client Secret` into the `GOOGLE_OAUTH_CLIENT_SECRET` environment variable.
+   - Set the authorized JavaScript origins to your frontend URL (e.g., `http://localhost:3000` for development).
+   - Set the authorized redirect URIs to your backend URL followed by the callback path (e.g., `http://localhost:8000/accounts/google/login/callback/`).
+
+### Manual Testing
+1. To log in via Google OAuth, use the following URL:
+   ```
+   https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=<CALLBACK_URL_YOU_SET_ON_GOOGLE>&prompt=consent&response_type=code&client_id=<YOUR_CLIENT_ID>&scope=openid%20email%20profile&access_type=offline
+   ```
+   Replace `<CALLBACK_URL_YOU_SET_ON_GOOGLE>` with the callback URL you configured in the Django settings, and `<YOUR_CLIENT_ID>` with the Google OAuth Client ID.
+2. After the redirection, copy the `code` part from the URL query string (decoded, as it is URL encoded).
+3. POST the `code` to the `/api/rest-auth/google` endpoint. The body of the POST must have a key called `code` with the value from the previous step.
+4. A user will be created/logged in, and an authorization token will be returned.
+
+## Deployment
+1. Create a social application in the Django admin panel.
+2. Ensure that the redirect URL in the Django settings (`GOOGLE_REDIRECT_URL`) matches the one set in the Google Cloud Console.
 
 ## Development
 
@@ -175,6 +184,9 @@ In order to interact with the API, visit `/api/swagger/`
 * **django-extensions**: Adds a collection of custom extensions for Django, including management commands and additional debugging tools.
 * **pillow**: Python Imaging Library fork, necessary for image processing in Django, often used for ImageField in models.
 * **django-cleanup**: Automatically deletes files for FileField, ImageField, and subclasses, helping to manage file storage and prevent orphaned files.
+* **drf-yasg**: Generates real Swagger/OpenAPI 2.0 specifications from a Django Rest Framework API.
+* **pre-commit**: A framework for managing pre-commit hooks.
+* **ruff**: Python linter, focuses on performance and type checking.
 
 ## Notes on extra requirements
 
@@ -185,3 +197,8 @@ In order to interact with the API, visit `/api/swagger/`
 * ✅ Follow OAuth 2 protocol for authentication (You can use a third party public OAuth provider).
 * ⚠️  (incomplete) The project is ready for Continuous Deployment using a provider (e.g. AWS).
 * ✅ The project uses Docker, Vagrant or other tools to make it easier to configure development environments.
+* All API endpoints require token authentication.
+* SQL injection and XSS prevention are handled by Django's ORM and template system (not used).
+* The admin superuser can manage other users through the Django admin interface.
+* Image uploads are managed through Django's ImageField, which handles file uploads. django-cleanup provides facilities to remove files when no longer needed.
+* Tests for third party libraries, have not been created assuming that they have been thoroughly tested already. Tests bypass e.g. third-party authentication mechanisms in order to test the actual functionality.
