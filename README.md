@@ -37,12 +37,12 @@ Developers should consult with the [Setup](#setup) and [Development](#developmen
    docker compose exec web python manage.py migrate
    ```
 
-5. Create a superuser:
+5. Seed database with test data (see Database Initialization) :
    ```
-   docker-compose exec web python manage.py createsuperuser
+   docker compose exec web python manage.py seed_db
    ```
 
-6. Sign in as admin (use credentials just created) to create a user and set `is_admin` to true:
+6. Sign in as admin (see Database Initialization):
    - Navigate to `http://localhost:8000/admin/`
 
 7. Browse API:
@@ -147,28 +147,6 @@ To access the Django shell with additional utilities:
 ```
 docker compose exec web python manage.py shell_plus
 ```
-
-## Deployment
-
-1. Ensure your `.env` file is properly configured for production, for example:
-   ```
-   SECRET_KEY='secret_key'
-   DEBUG=0
-   ALLOWED_HOSTS=crmapi.com,www.crmapi.com
-   ```
-
-2. Set CORS appropriately in `settings.py`
-
-3. Build and run the Docker containers:
-   ```
-   docker compose -f docker-compose.prod.yml up -d
-   ```
-
-4. Run migrations:
-   ```
-   docker compose -f docker-compose.prod.yml exec web python manage.py migrate
-   docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic
-   ```
 
 ## Usage
 

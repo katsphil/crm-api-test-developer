@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
+from customers.models import Customer
+
 User = get_user_model()
 
 
@@ -32,15 +34,9 @@ class Command(BaseCommand):
         )
 
     def create_customers(self):
-        User.objects.create_user(
-            username="customer1", email="customer1@example.com", password="password123"
-        )
-        User.objects.create_user(
-            username="customer2", email="customer2@example.com", password="password123"
-        )
-        User.objects.create_user(
-            username="customer3", email="customer3@example.com", password="password123"
-        )
+        Customer.objects.create(name="customer1", surname="customer1surname")
+        Customer.objects.create(name="customer2", surname="customer2surname")
+        Customer.objects.create(name="customer3", surname="customer3surname")
 
     def create_superuser(self):
         User.objects.create_superuser(
@@ -49,10 +45,12 @@ class Command(BaseCommand):
 
     def create_google_social_app(self):
         site = Site.objects.get_current()
-        SocialApp.objects.create(
+
+        social_app = SocialApp.objects.create(
             provider="google",
             name="Google",
             client_id=settings.GOOGLE_OAUTH_CLIENT_ID,
             secret=settings.GOOGLE_OAUTH_CLIENT_SECRET,
-            sites=[site],
         )
+
+        social_app.sites.set([site])
