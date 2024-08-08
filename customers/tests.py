@@ -9,7 +9,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Customer, User
-from .models import User
 
 
 def generate_photo_file():
@@ -123,8 +122,12 @@ class CustomerAPITest(APITestCase):
 
 class UserAPITest(APITestCase):
     def setUp(self):
-        self.admin_user = User.objects.create_user(username='admin', password='adminpass', is_admin=True)
-        self.normal_user = User.objects.create_user(username='normal', password='normalpass')
+        self.admin_user = User.objects.create_user(
+            username="admin", password="adminpass", is_admin=True
+        )
+        self.normal_user = User.objects.create_user(
+            username="normal", password="normalpass"
+        )
         self.url = reverse("user-detail", kwargs={"pk": self.normal_user.pk})
 
     def test_list_users(self):

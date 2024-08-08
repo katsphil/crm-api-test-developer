@@ -48,6 +48,55 @@ Developers should consult with the [Setup](#setup) and [Development](#developmen
 7. Browse API:
    - Navigate to `http://localhost:8000/api/swagger/`
 
+## Database Initialization
+For local testing or development purposes, seed the database with `docker compose exec web python manage.py seed_db`
+The database will be seeded with:
+	- a `Google` social application to be used for OAuth (using credentials provided in `.env`)
+	- a superuser to be used on `/admin/`	  
+		username: `admin`  
+		password: `password123`  
+	- two users:
+		- CRM admin user  
+			username: `admin_user`  
+			password: `password123`  
+		- CRM normal user  
+			username: `normal_user`  
+			password: `password123`
+	- a few customers
+
+# OAuth
+We will be using Google as a third party OAuth provider
+* set social app in django admin * set callback url
+* SUPPLY test user email in order to add to the oauth consent screen test users on google cloud console
+* Set redirect URL in Google Cloud Console and in `settings.py`
+* Deployment create social application in `/admin/`
+* Define the redirect URL as the same as where you start your server e.g. http://127.0.0.1.
+	- Set this value to `GOOGLE_REDIRECT_URL` in `settings.py`
+	- Add it as a redirect URI in Authorized Javascript origins and Authorized redirect URIs in your Project in the Oauth Credential in the Google Developer console.
+
+* To login via Google OAuth:
+	Fill in:
+	```
+	<CALLBACK_URL_YOU_SET_ON_GOOGLE> e.g. http://127.0.0.1.
+	<YOUR CLIENT ID> Google OAuth Client
+	```
+	Into, and navigate to it:
+	`https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=<CALLBACK_URL_YOU_SET_ON_GOOGLE>&prompt=consent&response_type=code&client_id=<YOUR CLIENT ID>&scope=openid%20email%20profile&access_type=offline`
+
+* If testing manually, after the redirection:
+	- Copy the `code` part from the url query string (decode as it is URL encoded)
+	- POST to `/api/rest-auth/google`. The body of the POST must have a key called `code` with the value from the previous step.
+	A user will be created/logged in and an authorization token, returned.
+
+
+* Create a new project and set up Google OAuth credentials in Google Cloud Console (https://console.cloud.google.com/) and copy:
+	* Copy `Client ID` into `GOOGLE_OAUTH_CLIENT_ID` of `.env` file
+	* Copy `Client Secret` into `GOOGLE_OAUTH_CLIENT_SECRET` of `.env` file
+
+   - Set the authorized JavaScript origins to your frontend URL (e.g., http://localhost:3000 for development)
+   - Set the authorized redirect URIs to your backend URL followed by the callback path (e.g., http://localhost:8000/accounts/google/login/callback/)
+   - Note down the Client ID and Client Secret
+
 ## Development
 
 If you want to develop without docker, follow these steps.
@@ -66,6 +115,11 @@ If you want to develop without docker, follow these steps.
    ```
    python manage.py runserver
    ```
+
+## Commits
+
+* Run `pre-commit install` in order to automatically have your code linted and
+    formatted before commiting.
 
 ### Adding Dependencies
 
@@ -144,38 +198,12 @@ In order to interact with the API, visit `/api/swagger/`
 * **pillow**: Python Imaging Library fork, necessary for image processing in Django, often used for ImageField in models.
 * **django-cleanup**: Automatically deletes files for FileField, ImageField, and subclasses, helping to manage file storage and prevent orphaned files.
 
-## Things to add
+## Notes on extra requirements
 
-* deploy to AWS
-* OAuth
-* production docker
-* script for auto setup (setup section)
-* seed_db.py script to seed DB with fake data and a superuser
-* logging
-* pagination & ordering
-* limit image size during upload
-* pre-commit + ruff for linting, formatting
-    ```
-    poetry add pre-commit ruff
-    ```
-    ```
-    # .pre-commit-config.yaml
-    repos:
-      - repo: https://github.com/charliermarsh/ruff-pre-commit
-        rev: v0.0.291
-        hooks:
-          - id: ruff
-    ```
-
-# Notes
 * ✅ README file with a getting started guide. 
 * ✅ Tests implemented for the solution.
 * ✅ Making project set-up for newcomers.
 * ✅ The application follows the twelve-factor app principles (https://12factor.net) in order for it to be scalable.
-* ⚠️  (incomplete) Follow OAuth 2 protocol for authentication (You can use a third party public OAuth provider).
+* ✅ Follow OAuth 2 protocol for authentication (You can use a third party public OAuth provider).
 * ⚠️  (incomplete) The project is ready for Continuous Deployment using a provider (e.g. AWS).
 * ✅ The project uses Docker, Vagrant or other tools to make it easier to configure development environments.
-* All API endpoints require authentication through Token Authentication.
-* SQL injection and XSS prevention are handled by Django's ORM and template system (not used).
-* Admin user can manage other users through the Django admin interface.
-* Image uploads are managed through Django's ImageField, which handles file uploads. djang-cleanup provides facilities to remove files when no longer needed.

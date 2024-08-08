@@ -26,6 +26,10 @@ jobs:
       run: |
         poetry install
 
+    - name: Run Ruff
+      run: |
+        poetry run ruff check .
+
     - name: Run tests
       env:
         DEBUG: 1
